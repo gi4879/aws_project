@@ -54,7 +54,7 @@ resource "aws_s3_bucket_public_access_block" "public_access" {
 	restrict_public_buckets = true
 }
 
-# 잠금설정을 위한 다이나 DB 생성
+# 잠금설정을 위한 다이나모 DB 생성
 resource "aws_dynamodb_table" "terraform_locks" {
 	name				 = var.dynamodb_name
 	billing_mode = "PAY_PER_REQUEST"
