@@ -4,12 +4,15 @@
   connection: local # nodes에 대한 정보를 읽어서 실행되는 목적지를 local로 지정
   serial: 1         # 실행되는 task를 하나씩 진행
   gather_facts: no
+  vars:
+    ansible_password: vagrant
 
   tasks:
     - name: ssh-keyscan for konwn_hosts file
       command: /usr/bin/ssh-keyscan -t ecdsa {{ ansible_host }}
       register: keyscan   # keyscan 변수에 출력 값을 저장
 
+   # known_hosts 파일 생성
    - name: input keyscan
      lineinfile: 
       path: ~/.ssh/known_hosts
@@ -17,3 +20,15 @@
       create: yes
     with_items:
       - "{{ keyscan.stdout_lines }}"
+      
+   - name: ssh-keygen for authorized_keys file
+     command: "ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N ''"
+     ignore_errors: yes
+     run_noce: true
+
+   - name: input key for each node
+     connection: ssh
+     authorized_keys:
+      user: vagrant
+      state: present
+      key: "{{ lookup('file','~/.ssh/id_rsa.pub') }}"
